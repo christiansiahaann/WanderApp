@@ -4,7 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.res.Resources;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -14,7 +16,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlay;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PointOfInterest;
@@ -48,6 +53,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        try {
+            boolean success=mMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(this,
+                            R.raw.map_style));
+            if(!success){
+                Log.e("TAG","Style parsing failed");
+            }
+        }catch (Resources.NotFoundException e){
+            Log.e("TAG","Cant't find style. Error: ",e);
+        }
+
         // Add a marker in Sydney and move the camera
         LatLng jogja = new LatLng(-7.797, 110.370);
         mMap.addMarker(new MarkerOptions().position(jogja).title("Marker in Jogja"));
@@ -55,6 +71,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(jogja,zoom));
         setMapLongClick(mMap);
         setPoiClick(mMap);
+
+        LatLng posOverlay = new LatLng(-7.797, 110.373);
+        GroundOverlayOptions overlay=new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.android))
+                .position(posOverlay,100);
+        mMap.addGroundOverlay(overlay);
+
     }
 
     private void setMapLongClick(GoogleMap map){
